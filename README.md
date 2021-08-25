@@ -11,7 +11,6 @@ Coming soon.
 Coming soon.
 
 ## VOT Toolkit reformat
-
 In order to use the rendered masks in VOT toolkit, use the _mask\_to\_vot.py_ file.
 
 #### Version 0.0.1
