@@ -1,5 +1,5 @@
 # Visual Tracker Simulator
-Generates and runs scenes using parameters from the text file.allows to render scene itself and its mask.
+Generates and runs scenes using parameters from the text file. Allows to render such scene and its mask.
 
 ## How to install
 Download the project, unzip it, create a folder called _visual\_tracker\_simulator_, place the _\_\_init\_\__ file in it. Copy this folder inside the add-on folder in the Blender installation location.
