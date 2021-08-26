@@ -41,6 +41,8 @@ fun_param_g = 0
 fun_param_h = 0
 fun_param_i = 0
 
+camera_speed = 0
+
 
 # Fog lowest strength, speed and its max
 fog_low = 0
@@ -53,12 +55,19 @@ light_low = 0
 light_strenght = 0
 light_speed = 0
 
+# Change focal lenght
+focal_low = 0
+focal_diff = 0
+focal_speed = 0
+
 
 def my_handler(scene):
     # For position of camera relative to it's path
     bpy.context.scene.camera.location[0] = fun_param_a + max(0, fun_param_b * math.sin(fun_param_c * bpy.context.scene.frame_current * 0.01))
     bpy.context.scene.camera.location[1] = fun_param_d + fun_param_e * math.sin(fun_param_f * bpy.context.scene.frame_current * 0.01)
     bpy.context.scene.camera.location[2] = fun_param_g + fun_param_h * math.sin(fun_param_i * bpy.context.scene.frame_current * 0.01)
+
+    bpy.context.scene.camera.constraints["Follow Path"].offset_factor = ((camera_speed * bpy.context.scene.frame_current) % 1) * 0.01
 
     # For fog strenth
     fog_mat = bpy.data.materials['FogCube']
@@ -71,6 +80,10 @@ def my_handler(scene):
     world = bpy.data.worlds['World']
     bg = world.node_tree.nodes['Background']
     bg.inputs[1].default_value = light_low + light_strenght * abs(math.sin(light_speed * bpy.context.scene.frame_current * 0.01))
+
+    bpy.data.cameras[0].lens = focal_low + focal_diff * math.sin(focal_speed * bpy.context.scene.frame_current * 0.01)
+
+    
 
 # --------------------------------------------------------------------------------
 # LOADING PARAMETERS FROM FILES
@@ -107,7 +120,8 @@ class SceneControlOperator(Operator):
             self.camera_control(
                 values[1], values[2], values[3],
                 values[4], values[5], values[6],
-                values[7], values[8], values[9])
+                values[7], values[8], values[9],
+                values[10])
         elif values[0] == "distractors":
             print("Distractors")
             self.density_control(values[1])
@@ -117,6 +131,9 @@ class SceneControlOperator(Operator):
         elif values[0] == "light":
             print("Light")
             self.light_control(values[1], values[2], values[3])
+        elif values[0] == "focal":
+            print("Focal")
+            self.focal_control(values[1], values[2], values[3])
         else:
             print("Unassigned")
 
@@ -156,10 +173,11 @@ class SceneControlOperator(Operator):
         
 
     # Camera control
-    def camera_control(self, a, b, c, d, e, f, g, h, i):
+    def camera_control(self, a, b, c, d, e, f, g, h, i, speed):
         global fun_param_a, fun_param_b, fun_param_c
         global fun_param_d, fun_param_e, fun_param_f
         global fun_param_g, fun_param_h, fun_param_i
+        global camera_speed
         
         fun_param_a = float(a)
         fun_param_b = float(b)
@@ -172,6 +190,8 @@ class SceneControlOperator(Operator):
         fun_param_g = float(g)
         fun_param_h = float(h)
         fun_param_i = float(i)
+
+        camera_speed = float(speed)
 
 
     # Object density conrol
@@ -237,6 +257,13 @@ class SceneControlOperator(Operator):
         light_low = float(low)
         light_strenght = float(strength)
         light_speed =float(speed)
+
+
+    def focal_control(self, low, strength, speed):
+        global focal_low, focal_diff, focal_speed
+        focal_low = float(low)
+        focal_diff = float(strength)
+        focal_speed =float(speed)
 
 
 # ----------------------------------------------------------------------------------------------

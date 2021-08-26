@@ -1,0 +1,6 @@
+following Jeep JeepCircle -1 0 -1
+distractors 4
+camera 0 0 1 0 0 1 0 0 1 5
+fog 0 0 5
+light 1 1 5
+focal 50 0 10
