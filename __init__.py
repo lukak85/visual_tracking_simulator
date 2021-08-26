@@ -48,17 +48,21 @@ camera_speed = 0
 fog_low = 0
 fog_strength = 0
 fog_speed = 0
+fog_start_offset = 0
 
 
 # Light lowest strenght, speed and its max
 light_low = 0
 light_strenght = 0
 light_speed = 0
+light_start_offset = 0
+
 
 # Change focal lenght
 focal_low = 0
 focal_diff = 0
 focal_speed = 0
+focal_start_offset = 0
 
 
 def my_handler(scene):
@@ -75,13 +79,13 @@ def my_handler(scene):
     nodes = fog_mat.node_tree.nodes
     volume_node = nodes.get("Volume Scatter")
 
-    volume_node.inputs[1].default_value = fog_low + fog_strength *  abs(math.sin(fog_speed * bpy.context.scene.frame_current * 0.01))
+    volume_node.inputs[1].default_value = fog_low + fog_strength *  abs(math.sin(fog_speed * (bpy.context.scene.frame_current + fog_start_offset) * 0.01))
 
     world = bpy.data.worlds['World']
     bg = world.node_tree.nodes['Background']
-    bg.inputs[1].default_value = light_low + light_strenght * abs(math.sin(light_speed * bpy.context.scene.frame_current * 0.01))
+    bg.inputs[1].default_value = light_low + light_strenght * abs(math.sin(light_speed * (bpy.context.scene.frame_current + light_start_offset) * 0.01))
 
-    bpy.data.cameras[0].lens = focal_low + focal_diff * math.sin(focal_speed * bpy.context.scene.frame_current * 0.01)
+    bpy.data.cameras[0].lens = focal_low + focal_diff * math.sin(focal_speed * (bpy.context.scene.frame_current + focal_start_offset) * 0.01)
 
 
 
@@ -129,13 +133,13 @@ class SceneControlOperator(Operator):
             self.density_control(values[1])
         elif values[0] == "fog":
             print("Fog")
-            self.fog_control(values[1], values[2], values[3])
+            self.fog_control(values[1], values[2], values[3], values[4])
         elif values[0] == "light":
             print("Light")
-            self.light_control(values[1], values[2], values[3])
+            self.light_control(values[1], values[2], values[3], values[4])
         elif values[0] == "focal":
             print("Focal")
-            self.focal_control(values[1], values[2], values[3])
+            self.focal_control(values[1], values[2], values[3], values[4])
         else:
             print("Unassigned")
 
@@ -250,25 +254,28 @@ class SceneControlOperator(Operator):
                     layer_collection.objects.link(generated_object)
                 index += 1
 
-    def fog_control(self, low, strength, speed):
-        global fog_low, fog_strength, fog_speed
+    def fog_control(self, low, strength, speed, offset):
+        global fog_low, fog_strength, fog_speed, fog_start_offset
         fog_low = float(low)
         fog_speed = float(speed)
         fog_strength = float(strength)
+        fog_start_offset = float(offset)
 
 
-    def light_control(self, low, strength, speed):
-        global light_low, light_strenght, light_speed
+    def light_control(self, low, strength, speed, offset):
+        global light_low, light_strenght, light_speed, light_start_offset
         light_low = float(low)
-        light_strenght = float(strength)
         light_speed =float(speed)
+        light_strenght = float(strength)
+        light_start_offset =float(offset)
 
 
-    def focal_control(self, low, strength, speed):
-        global focal_low, focal_diff, focal_speed
+    def focal_control(self, low, strength, speed, offset):
+        global focal_low, focal_diff, focal_speed, focal_start_offset
         focal_low = float(low)
-        focal_diff = float(strength)
         focal_speed =float(speed)
+        focal_diff = float(strength)
+        focal_start_offset = float(offset)
 
 
 # ----------------------------------------------------------------------------------------------
