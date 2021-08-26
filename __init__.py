@@ -63,11 +63,11 @@ focal_speed = 0
 
 def my_handler(scene):
     # For position of camera relative to it's path
-    bpy.context.scene.camera.location[0] = fun_param_a + max(0, fun_param_b * math.sin(fun_param_c * bpy.context.scene.frame_current * 0.01))
+    bpy.context.scene.camera.location[0] = fun_param_a + abs(fun_param_b * math.sin(fun_param_c * bpy.context.scene.frame_current * 0.01))
     bpy.context.scene.camera.location[1] = fun_param_d + fun_param_e * math.sin(fun_param_f * bpy.context.scene.frame_current * 0.01)
     bpy.context.scene.camera.location[2] = fun_param_g + fun_param_h * math.sin(fun_param_i * bpy.context.scene.frame_current * 0.01)
 
-    bpy.context.scene.camera.constraints["Follow Path"].offset_factor = ((camera_speed * bpy.context.scene.frame_current) % 1) * 0.01
+    bpy.context.scene.camera.constraints["Follow Path"].offset_factor = ((camera_speed * bpy.context.scene.frame_current * 0.01) % 1)
 
     # For fog strenth
     fog_mat = bpy.data.materials['FogCube']
@@ -83,13 +83,15 @@ def my_handler(scene):
 
     bpy.data.cameras[0].lens = focal_low + focal_diff * math.sin(focal_speed * bpy.context.scene.frame_current * 0.01)
 
-    
+
 
 # --------------------------------------------------------------------------------
 # LOADING PARAMETERS FROM FILES
 # --------------------------------------------------------------------------------
 
 file_path = ""
+
+followed_object = ""
 
 class SceneControlOperator(Operator):
     """Scene Control"""
@@ -149,6 +151,9 @@ class SceneControlOperator(Operator):
 
     # Choose following object
     def choose_following_object(self, object_name, camera_path, x, y, z):
+        global followed_object
+        followed_object = object_name
+
         camera = bpy.context.scene.camera
 
         # Make the followed object the center of the camera
@@ -300,6 +305,8 @@ class RenderSceneOperator(Operator):
         links = tree.links
         link = links.new(default_render_layer.outputs[0], output_node.inputs[0])
 
+        bpy.context.scene.render.use_lock_interface = True
+
         bpy.ops.render.render('INVOKE_DEFAULT', animation=True)
 
 
@@ -328,7 +335,7 @@ class RenderMaskOperator(Operator):
 
         # Create render output node
         default_render_layer = tree.nodes.new(type='CompositorNodeRLayers')
-        default_render_layer.layer =  bpy.context.view_layer
+        default_render_layer.layer =  bpy.context.scene.view_layers[followed_object].name
         default_render_layer.location = 0,0
 
         alpha_over_node = tree.nodes.new(type='CompositorNodeAlphaOver')
@@ -348,6 +355,8 @@ class RenderMaskOperator(Operator):
 
         links = tree.links
         link = links.new(blur_node.outputs[0], output_node.inputs[0])
+
+        bpy.context.scene.render.use_lock_interface = True
 
         bpy.ops.render.render('INVOKE_DEFAULT', animation=True)
 
@@ -390,7 +399,7 @@ class FileSelector(Operator):
 class SceneControlPanel(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Visual Tracker Simulator"
+    bl_category = "Visual Tracking Simulator"
     bl_options = {"DEFAULT_CLOSED"}
     bl_context = "objectmode"
     bl_idname = "object.scene_control_panel"
@@ -438,7 +447,7 @@ def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.Scene.file_tool
-    bpy.app.handlers.frame_change_post.remove(my_handler)
+    # bpy.app.handlers.frame_change_post.remove(my_handler)
 
 if __name__ == "__main__":
     register()
