@@ -67,9 +67,9 @@ focal_start_offset = 0
 
 def my_handler(scene):
     # For position of camera relative to it's path
-    bpy.context.scene.camera.location[0] = fun_param_a + abs(fun_param_b * math.sin(fun_param_c * bpy.context.scene.frame_current * 0.01))
+    bpy.context.scene.camera.location[0] = fun_param_a + fun_param_b * math.sin(fun_param_c * bpy.context.scene.frame_current * 0.01)
     bpy.context.scene.camera.location[1] = fun_param_d + fun_param_e * math.sin(fun_param_f * bpy.context.scene.frame_current * 0.01)
-    bpy.context.scene.camera.location[2] = fun_param_g + fun_param_h * math.sin(fun_param_i * bpy.context.scene.frame_current * 0.01)
+    bpy.context.scene.camera.location[2] = fun_param_g + abs(fun_param_h * math.sin(fun_param_i * bpy.context.scene.frame_current * 0.01))
 
     bpy.context.scene.camera.constraints["Follow Path"].offset_factor = ((camera_speed * bpy.context.scene.frame_current * 0.01) % 1)
 
